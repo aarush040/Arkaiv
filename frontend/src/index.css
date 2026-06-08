@@ -1,0 +1,244 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
+  
+  --color-brand-primary: #6366f1;
+  --color-brand-primary-container: #818cf8;
+  --color-brand-secondary: #22d3ee;
+  --color-brand-secondary-container: #67e8f9;
+  --color-brand-tertiary: #a855f7;
+  --color-brand-tertiary-container: #c084fc;
+  --color-brand-background: #0f172a;
+  --color-brand-surface: rgba(51, 65, 85, 0.85);
+}
+
+@layer utilities {
+  .glass-card {
+    background: rgba(30, 41, 59, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(99, 102, 241, 0.25) inset !important;
+  }
+  
+  .glass-ai {
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.45) !important;
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.2) !important;
+  }
+
+  .ai-glow {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.35), 0 0 50px rgba(34, 211, 238, 0.15);
+  }
+
+  .progress-glow {
+    box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
+  }
+
+  .glow-btn-primary {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.45) !important;
+    border: 1px solid rgba(129, 140, 248, 0.5) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .glow-btn-secondary {
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.4) !important;
+    border: 1px solid rgba(34, 211, 238, 0.5) !important;
+  }
+}
+
+/* Base resets & typography for deep metal layout */
+body {
+  background-color: #0f172a !important;
+  background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+                    radial-gradient(circle at 90% 80%, rgba(34, 211, 238, 0.14) 0%, transparent 50%),
+                    linear-gradient(135deg, #090d16 0%, #0f172a 100%) !important;
+  background-attachment: fixed !important;
+  color: #f1f5f9 !important;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* App roots transparent layer */
+#arkaiv-root,
+#arkaiv-dashboard-root,
+#arkaiv-login-root,
+#arkaiv-onboarding-root {
+  background-color: transparent !important;
+}
+
+/* Top header navigation with crisp boundaries */
+header {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.4) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Left sidebar panel styled like a metal wing */
+aside {
+  background-color: rgba(9, 13, 22, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-right: 1px solid rgba(100, 116, 139, 0.3) !important;
+}
+
+/* Central workspace body container */
+main, .bg-[#fafbfd], .bg-[#f8fafc], .bg-slate-50/70 {
+  background-color: transparent !important;
+}
+
+/* Crisp dark metallic card styles */
+.bg-white, [class*="bg-white"], .glass-card {
+  background-color: rgba(51, 65, 85, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid #64748b !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 1px 1px rgba(99, 102, 241, 0.2) inset !important;
+}
+
+/* Inner lists, panels, and items within cards must remain readable */
+.bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-slate-100\/95, .bg-slate-50\/15, .bg-slate-50\/50, .bg-slate-900\/50, .bg-slate-900\/40, .bg-slate-900\/30 {
+  background-color: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid #64748b !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Standard content borders */
+.border, .border-slate-200, .border-slate-100, .border-slate-150, .border-gray-200 {
+  border-color: #64748b !important;
+}
+
+/* Accessible high-contrast typography colors */
+.text-slate-900, .text-slate-950, .text-slate-800, .text-slate-705, .text-slate-700, .text-slate-650, .text-slate-600, .text-gray-900, .text-gray-800, .text-gray-700 {
+  color: #f1f5f9 !important;
+}
+
+.text-slate-500, .text-slate-550, .text-slate-400, .text-gray-500, .text-gray-400 {
+  color: #cbd5e1 !important;
+}
+
+/* Heading display settings */
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display) !important;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #ffffff !important;
+}
+
+/* Accent Indigo-specific links and themes */
+.text-indigo-600, .text-indigo-700, .text-indigo-800, .text-indigo-750, .text-indigo-900, .text-indigo-950, .text-indigo-400, .text-indigo-300 {
+  color: #818cf8 !important;
+}
+
+.bg-indigo-600 {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.45) !important;
+  border: 1px solid rgba(129, 140, 248, 0.5) !important;
+}
+
+.bg-indigo-600:hover {
+  background-color: #818cf8 !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.6) !important;
+}
+
+.bg-indigo-50, .bg-indigo-50\/50, .bg-indigo-50\/40, .bg-indigo-50\/70, .bg-indigo-950\/40, .bg-indigo-650\/20 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.4) !important;
+  color: #a5b4fc !important;
+}
+
+/* Cyan & Emerald specific states */
+.text-emerald-500, .text-emerald-600, .text-emerald-700, .text-emerald-800, .text-cyan-400, .text-emerald-400 {
+  color: #22d3ee !important;
+}
+
+.bg-emerald-50, .bg-emerald-50\/60, .bg-emerald-100 {
+  background-color: rgba(34, 211, 238, 0.15) !important;
+  border: 1px solid rgba(34, 211, 238, 0.4) !important;
+  color: #22d3ee !important;
+}
+
+/* Success & warning values */
+.bg-emerald-500, .bg-emerald-600 {
+  background-color: #34d399 !important;
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.4) !important;
+}
+
+/* Active side nav highlights with glow borders */
+.bg-indigo-600.text-white {
+  background-color: #6366f1 !important;
+  border-left: 3px solid #22d3ee !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.35) !important;
+}
+
+.hover\:bg-slate-50\/50:hover, button[class*="hover:bg-slate-50"]:hover {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Custom crisp inputs, dropdown selects & textareas styling */
+input, select, textarea {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(100, 116, 139, 0.5) !important;
+  color: #f1f5f9 !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #22d3ee !important;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.25), inset 0 2px 4px 0 rgba(0, 0, 0, 0.4) !important;
+  outline: none !important;
+}
+
+/* Table rendering elements */
+tr {
+  background-color: transparent !important;
+}
+
+thead, thead tr {
+  background-color: rgba(9, 13, 22, 0.85) !important;
+}
+
+th {
+  color: #cbd5e1 !important;
+  border-bottom: 2px solid rgba(100, 116, 139, 0.35) !important;
+}
+
+tbody tr {
+  border-bottom: 1px solid rgba(100, 116, 139, 0.2) !important;
+}
+
+tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+
+/* Scrollbars overrides */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16 !important;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5) !important;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75) !important;
+}

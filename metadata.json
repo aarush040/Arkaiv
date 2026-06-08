@@ -1,0 +1,6 @@
+{
+  "name": "Arkaiv",
+  "description": "Personalized AI-powered learning and roadmap platform for technical, professional, and custom paths.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

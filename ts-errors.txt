@@ -1,0 +1,14 @@
+backend/src/controllers/roadmapController.ts(102,53): error TS2339: Property '_id' does not exist on type 'IRoadmapStep'.
+backend/src/server.ts(73,14): error TS2769: No overload matches this call.
+  Overload 1 of 6, '(port: number, hostname: string, backlog: number, callback?: () => void): Server<typeof IncomingMessage, typeof ServerResponse>', gave the following error.
+    Argument of type 'string | 3000' is not assignable to parameter of type 'number'.
+      Type 'string' is not assignable to type 'number'.
+  Overload 2 of 6, '(port: number, hostname: string, callback?: () => void): Server<typeof IncomingMessage, typeof ServerResponse>', gave the following error.
+    Argument of type 'string | 3000' is not assignable to parameter of type 'number'.
+      Type 'string' is not assignable to type 'number'.
+src/components/DashboardView.tsx(394,19): error TS2322: Type '{ userGoal: string; submissions: any; onAddSubmission: (sub: Submission) => void; onGraded: (scores: any) => void; missions: any; onToggleMission: (id: string) => void; lang: any; }' is not assignable to type 'EvaluationProps'.
+  Property 'lang' does not exist on type 'EvaluationProps'.
+src/services/aiService.ts(3,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/services/authService.ts(3,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/services/roadmapService.ts(3,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/services/taskService.ts(3,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
