@@ -1,11 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import passport from 'passport';
 import User from '../models/User';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/tokens';
 import { AuthRequest } from '../middleware/auth';
+import { isMongoConnected } from '../config/db';
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { name, email, password } = req.body;
+    if (!isMongoConnected()) {
+      res.status(503).json({ error: 'Database is not connected. Please try again later.' });
+      return;
+    }
+
+    const { name, email, password, phone } = req.body;
 
     if (!name || !email || !password) {
       res.status(400).json({ error: 'Name, email, and password are required' });
@@ -23,7 +30,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, password, phone });
 
     const payload = { userId: user._id.toString(), email: user.email };
     const accessToken = generateAccessToken(payload);
@@ -42,8 +49,16 @@ export async function register(req: Request, res: Response, next: NextFunction):
   }
 }
 
+// Backwards-compatible alias
+export const localRegister = register;
+
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!isMongoConnected()) {
+      res.status(503).json({ error: 'Database is not connected. Please try again later.' });
+      return;
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -80,8 +95,16 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
+// Backwards-compatible alias
+export const localLogin = login;
+
 export async function getMe(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!isMongoConnected()) {
+      res.status(503).json({ error: 'Database is not connected. Please try again later.' });
+      return;
+    }
+
     if (!req.user?.userId) {
       res.status(401).json({ error: 'Not authenticated' });
       return;
@@ -145,6 +168,11 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
 
 export async function googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!isMongoConnected()) {
+      res.status(503).json({ error: 'Database is not connected. Please try again later.' });
+      return;
+    }
+
     const { googleId, name, email, avatar } = req.body;
 
     if (!googleId || !email) {
@@ -184,4 +212,54 @@ export async function googleAuth(req: Request, res: Response, next: NextFunction
   } catch (err) {
     next(err);
   }
+}
+
+/**
+ * Initiate Google OAuth 2.0 redirect flow.
+ * GET /api/auth/google
+ */
+export function googleAuthRedirect(req: Request, res: Response, next: NextFunction): void {
+  // If passport/google strategy is not configured, respond with helpful error
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    res.status(501).json({
+      error: 'Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the backend .env file.',
+    });
+    return;
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+}
+
+/**
+ * Google OAuth callback handler.
+ * GET /api/auth/google/callback
+ */
+export function googleAuthCallback(req: Request, res: Response, next: NextFunction): void {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+  passport.authenticate('google', { session: false, failureRedirect: `${frontendUrl}/login` }, async (err: any, user: any) => {
+    if (err) {
+      console.error('[Auth] Google OAuth callback error:', err.message);
+      // Redirect to frontend with a descriptive error rather than crashing
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed&reason=${encodeURIComponent(err.message || 'Server error')}`);
+    }
+    if (!user) {
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
+    }
+
+    try {
+      const payload = { userId: user._id.toString(), email: user.email };
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      // Redirect to frontend with tokens
+      const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+      res.redirect(redirectUrl);
+    } catch (saveErr: any) {
+      console.error('[Auth] Failed to issue tokens after Google auth:', saveErr.message);
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed&reason=${encodeURIComponent(saveErr.message || 'Token generation failed')}`);
+    }
+  })(req, res, next);
 }

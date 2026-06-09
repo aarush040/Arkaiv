@@ -1,48 +1,58 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('arkaiv_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import apiClient from './apiClient';
 
 export interface RoadmapData {
   goal: string;
-  targetDate?: string;
+  level?: string;
+  commitment?: number;
+  duration?: number;
 }
 
+export interface StepData {
+  title: string;
+  description?: string;
+  duration?: string;
+  completed?: boolean;
+  order?: number;
+}
+
+/**
+ * Roadmap service — manages the user's learning roadmap document.
+ * Backed by MongoDB via the ARKAIV REST API.
+ */
 export const roadmapService = {
-  async createRoadmap(data: RoadmapData) {
-    const response = await api.post('/roadmaps', data);
+  /** GET /api/roadmaps */
+  async getAll() {
+    const response = await apiClient.get('/roadmaps');
     return response.data;
   },
 
-  async getRoadmaps() {
-    const response = await api.get('/roadmaps');
+  /** GET /api/roadmaps/:id */
+  async getById(id: string) {
+    const response = await apiClient.get(`/roadmaps/${id}`);
     return response.data;
   },
 
-  async updateRoadmap(id: string, data: Partial<{ goal: string; targetDate: string; progress: number }>) {
-    const response = await api.put(`/roadmaps/${id}`, data);
+  /** POST /api/roadmaps */
+  async create(data: RoadmapData) {
+    const response = await apiClient.post('/roadmaps', data);
     return response.data;
   },
 
+  /** PUT /api/roadmaps/:id */
+  async update(id: string, data: Partial<RoadmapData> & { steps?: StepData[]; progress?: number }) {
+    const response = await apiClient.put(`/roadmaps/${id}`, data);
+    return response.data;
+  },
+
+  /** PUT /api/roadmaps/:id/steps/:stepId */
   async updateStepStatus(roadmapId: string, stepId: string, completed: boolean) {
-    const response = await api.put(`/roadmaps/${roadmapId}/steps/${stepId}`, { completed });
+    const response = await apiClient.put(`/roadmaps/${roadmapId}/steps/${stepId}`, { completed });
     return response.data;
   },
 
+  /** POST /api/ai/generate-roadmap */
   async generateRoadmap(goal: string, duration?: string, level?: string) {
-    const response = await api.post('/ai/generate-roadmap', { goal, duration, level });
+    const response = await apiClient.post('/ai/generate-roadmap', { goal, duration, level });
     return response.data;
   },
 };

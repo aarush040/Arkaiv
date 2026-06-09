@@ -1,46 +1,47 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('arkaiv_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import apiClient from './apiClient';
 
 export interface TaskData {
   title: string;
   description?: string;
+  category?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+  duration?: string;
   dueDate?: string;
   completed?: boolean;
 }
 
+/**
+ * Task service — CRUD for the user's daily study tasks.
+ * Backed by MongoDB via the ARKAIV REST API.
+ */
 export const taskService = {
-  async createTask(data: TaskData) {
-    const response = await api.post('/tasks', data);
+  /** GET /api/tasks */
+  async getAll() {
+    const response = await apiClient.get('/tasks');
     return response.data;
   },
 
-  async getTasks() {
-    const response = await api.get('/tasks');
+  /** GET /api/tasks/:id */
+  async getById(id: string) {
+    const response = await apiClient.get(`/tasks/${id}`);
     return response.data;
   },
 
-  async updateTask(id: string, data: Partial<TaskData>) {
-    const response = await api.put(`/tasks/${id}`, data);
+  /** POST /api/tasks */
+  async create(data: TaskData) {
+    const response = await apiClient.post('/tasks', data);
     return response.data;
   },
 
-  async deleteTask(id: string) {
-    const response = await api.delete(`/tasks/${id}`);
+  /** PUT /api/tasks/:id */
+  async update(id: string, data: Partial<TaskData>) {
+    const response = await apiClient.put(`/tasks/${id}`, data);
+    return response.data;
+  },
+
+  /** DELETE /api/tasks/:id */
+  async delete(id: string) {
+    const response = await apiClient.delete(`/tasks/${id}`);
     return response.data;
   },
 };

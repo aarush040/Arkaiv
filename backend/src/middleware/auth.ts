@@ -25,6 +25,9 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
   }
 }
 
+// Backwards-compatible alias
+export const authenticateJWT = authenticate;
+
 export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
 

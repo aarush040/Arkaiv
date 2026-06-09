@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Submission, DailyMission } from '../types';
 import taskService from '../services/taskService';
+import aiService from '../services/aiService';
 
 interface EvaluationProps {
   userGoal: string;
@@ -156,18 +157,13 @@ export default function EvaluationView({
     }
 
     try {
-      // Use the root-level server's evaluate endpoint via taskService
-      const response = await fetch("/api/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName,
-          userGoal,
-          selectedMissionId
-        })
+      // Call the backend's AI evaluate endpoint through the aiService
+      // (so it goes through the same auth/axios pipeline).
+      const data = await aiService.evaluateSubmission({
+        fileName,
+        userGoal,
+        selectedMissionId,
       });
-
-      const data = await response.json();
       
       const parsedScores = {
         understanding: data.scores.understanding || 0,

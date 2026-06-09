@@ -1,33 +1,45 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IQuestion {
+export interface IQuizQuestion {
   question: string;
   options: string[];
   correctAnswer: number;
+  explanation?: string;
 }
 
 export interface IQuiz extends Document {
-  topicId: string;
-  title: string;
+  userId: mongoose.Types.ObjectId;
+  topic: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  questions: IQuestion[];
+  questions: IQuizQuestion[];
+  userAnswers?: number[];
+  score?: number;
+  completed: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
-const QuestionSchema = new Schema<IQuestion>({
-  question: { type: String, required: true },
-  options: [{ type: String, required: true }],
-  correctAnswer: { type: Number, required: true },
-});
-
-const QuizSchema = new Schema<IQuiz>(
+const quizQuestionSchema = new Schema<IQuizQuestion>(
   {
-    topicId: { type: String, required: true, index: true },
-    title: { type: String, required: true },
+    question: { type: String, required: true },
+    options: { type: [String], required: true },
+    correctAnswer: { type: Number, required: true },
+    explanation: { type: String },
+  },
+  { _id: false }
+);
+
+const quizSchema = new Schema<IQuiz>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    topic: { type: String, required: true, trim: true },
     difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
-    questions: [QuestionSchema],
+    questions: { type: [quizQuestionSchema], default: [] },
+    userAnswers: { type: [Number], default: [] },
+    score: { type: Number, default: 0 },
+    completed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<IQuiz>('Quiz', QuizSchema);
+export default mongoose.model<IQuiz>('Quiz', quizSchema);

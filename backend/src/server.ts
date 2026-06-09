@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
+import passport from 'passport';
 
 // ES Module compatible __dirname replacement
 const __filename = fileURLToPath(import.meta.url);
@@ -72,17 +73,18 @@ async function startServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
-  // Connect to MongoDB (non-fatal if fails)
+  // Connect to MongoDB — non-fatal so the server can still serve the
+  // frontend and auth endpoints even when the DB is unreachable.
   try {
     await connectDB();
-    console.log('[Startup] MongoDB connected successfully');
   } catch (dbError: any) {
     console.warn('[Startup] WARNING: MongoDB connection failed:', dbError.message);
-    console.warn('[Startup] Server will run without database. Set MONGODB_URI in .env to connect.');
+    console.warn('[Startup] Server will run in degraded mode. Set MONGODB_URI in .env to connect.');
   }
 
-  // Configure Passport
+  // Configure Passport (registers Google OAuth strategy)
   configurePassport();
+  app.use(passport.initialize());
 
   // Health check - MUST be before Vite middleware
   app.get('/api/health', (_req, res) => {
@@ -104,7 +106,20 @@ async function startServer() {
   app.use(errorHandler);
 
   // Vite dev middleware or static file serving
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.DISABLE_VITE === 'true') {
+    // Backend-only mode — the frontend is served by a separate Vite dev
+    // server (e.g. `npm run dev:frontend`). This is the recommended setup
+    // when you want the API and the SPA to live in different processes.
+    console.log('[Startup] Vite dev middleware disabled (DISABLE_VITE=true).');
+    console.log('[Startup] Frontend should be started separately with `npm run dev:frontend`.');
+    app.get('/', (_req, res) => {
+      res.json({
+        status: 'ok',
+        message: 'ARKAIV API. Frontend should be running on http://localhost:5173',
+        docs: 'See ARCHITECTURE_REPORT.md, API_DOCUMENTATION.md',
+      });
+    });
+  } else if (process.env.NODE_ENV !== 'production') {
     console.log('[Startup] Starting Vite dev middleware...');
     const vite = await createViteServer({
       server: {

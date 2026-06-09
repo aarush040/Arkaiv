@@ -31,7 +31,8 @@ export default function App() {
       return;
     }
 
-    authService.getMe()
+    authService
+      .getCurrentUser()
       .then((userData) => {
         setAuthUser({
           name: userData.name,
@@ -40,7 +41,7 @@ export default function App() {
         });
 
         // Load progress from backend
-        return progressService.getProgress();
+        return progressService.get();
       })
       .then((progressData: any) => {
         if (progressData && progressData.goal) {
@@ -64,12 +65,91 @@ export default function App() {
       });
   }, []);
 
+  // Handle the post-Google-OAuth redirect. The backend redirects the browser
+  // to <FRONTEND_URL>/auth/callback?accessToken=...&refreshToken=... once
+  // Google has authenticated the user. We:
+  //   1. Capture the tokens from the URL.
+  //   2. Persist them via authService.
+  //   3. Replace the URL so the tokens don't sit in browser history.
+  //   4. Fetch the user and let the rest of the app boot normally.
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path !== '/auth/callback' && path !== '/auth/callback/') {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get('accessToken');
+    const refreshToken = params.get('refreshToken');
+    const error = params.get('error');
+
+    // Replace the URL regardless of outcome so tokens don't leak via history.
+    window.history.replaceState({}, document.title, '/');
+
+    if (error) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (accessToken) {
+      try {
+        localStorage.setItem('arkaiv_token', accessToken);
+      } catch {
+        // ignore
+      }
+    }
+    if (refreshToken) {
+      try {
+        localStorage.setItem('arkaiv_refresh_token', refreshToken);
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!accessToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    authService
+      .getCurrentUser()
+      .then((userData) => {
+        setAuthUser({
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone || '',
+        });
+        // Load progress if it exists; otherwise onboarding will run.
+        return progressService.get().catch(() => null);
+      })
+      .then((progressData: any) => {
+        if (progressData && progressData.goal) {
+          setProfile({
+            goal: progressData.goal,
+            level: progressData.level || 'B.Tech 2nd Year',
+            commitment: progressData.commitment || 2,
+            duration: progressData.duration || 12,
+            marksheetUploaded: progressData.marksheetUploaded || false,
+            marksheetName: progressData.marksheetName,
+          });
+        }
+      })
+      .catch(() => {
+        // If the call fails just let the user land on the login screen.
+        localStorage.removeItem('arkaiv_token');
+        localStorage.removeItem('arkaiv_refresh_token');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
   const handleLoginSuccess = async (user: AuthUser, isRegisterFlow: boolean) => {
     setAuthUser(user);
 
     // Try loading profile from backend
     try {
-      const progressData: any = await progressService.getProgress();
+      const progressData: any = await progressService.get();
       if (progressData && progressData.goal) {
         setProfile({
           goal: progressData.goal,
@@ -106,7 +186,7 @@ export default function App() {
     setProfile(data);
 
     try {
-      await progressService.saveProgress({
+      await progressService.save({
         goal: data.goal,
         level: data.level,
         commitment: data.commitment,
@@ -148,14 +228,13 @@ export default function App() {
       ) : !profile ? (
         <OnboardingView onComplete={handleOnboardingComplete} />
       ) : (
-        <DashboardView 
-          initialProfile={profile} 
-          onLogOut={handleLogOut} 
-          user={authUser} 
-          onRedoOnboarding={handleRedoOnboarding} 
+        <DashboardView
+          initialProfile={profile}
+          onLogOut={handleLogOut}
+          user={authUser}
+          onRedoOnboarding={handleRedoOnboarding}
         />
       )}
     </div>
   );
 }
-

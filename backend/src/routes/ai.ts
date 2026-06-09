@@ -1,19 +1,43 @@
 import { Router } from 'express';
-import { chat, generateAIRoadmap, generateAIQuiz, review } from '../controllers/aiController';
+import {
+  chat,
+  generateAIRoadmap,
+  generateAIQuiz,
+  review,
+  evaluateSubmission,
+} from '../controllers/aiController';
 import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
 
-// POST /api/ai/chat - Chat with AI mentor (protected)
-router.post('/chat', authenticateJWT, chat);
+// All AI endpoints are protected.
+router.use(authenticateJWT);
 
-// POST /api/ai/generate-roadmap - Generate AI roadmap (protected)
-router.post('/generate-roadmap', authenticateJWT, generateAIRoadmap);
+/**
+ * POST /api/ai/chat — Chat with the ARKAIV AI mentor.
+ */
+router.post('/chat', chat);
 
-// POST /api/ai/generate-quiz - Generate AI quiz (protected)
-router.post('/generate-quiz', authenticateJWT, generateAIQuiz);
+/**
+ * POST /api/ai/generate-roadmap — Generate a structured roadmap from a goal.
+ */
+router.post('/generate-roadmap', generateAIRoadmap);
 
-// POST /api/ai/review - Get AI performance review (protected)
-router.post('/review', authenticateJWT, review);
+/**
+ * POST /api/ai/generate-quiz — Generate a quiz on a topic.
+ */
+router.post('/generate-quiz', generateAIQuiz);
+
+/**
+ * POST /api/ai/review — Generate a personal performance review.
+ */
+router.post('/review', review);
+
+/**
+ * POST /api/evaluate — Backwards-compatible task-evaluation endpoint used
+ * by the legacy EvaluationView component. Performs a deterministic
+ * task-similarity check and returns a 5-dimensional NEP-2020 rubric.
+ */
+router.post('/evaluate', evaluateSubmission);
 
 export default router;

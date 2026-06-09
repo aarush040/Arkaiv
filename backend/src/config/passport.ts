@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
+import { isMongoConnected } from './db';
 
 export function configurePassport(): void {
   passport.serializeUser((user: any, done) => {
@@ -10,7 +11,7 @@ export function configurePassport(): void {
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await User.findById(id);
-      done(null, user);
+      done(null, user as any);
     } catch (err) {
       done(err, null);
     }
@@ -26,7 +27,12 @@ export function configurePassport(): void {
         },
         async (_accessToken, _refreshToken, profile, done) => {
           try {
-            let user = await User.findOne({ googleId: profile.id });
+            if (!isMongoConnected()) {
+              done(new Error('Database is not connected. Please try again later.'), undefined);
+              return;
+            }
+
+            let user: IUser | null = await User.findOne({ googleId: profile.id });
 
             if (!user) {
               user = await User.findOne({ email: profile.emails?.[0]?.value });
@@ -45,7 +51,7 @@ export function configurePassport(): void {
               }
             }
 
-            done(null, user);
+            done(null, user as any);
           } catch (err) {
             done(err as Error, undefined);
           }

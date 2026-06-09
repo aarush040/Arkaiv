@@ -9,6 +9,10 @@ export interface IUser extends Document {
   googleId?: string;
   avatar?: string;
   refreshToken?: string;
+  role?: 'user' | 'admin';
+  xp?: number;
+  level?: number;
+  streak?: number;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -23,6 +27,10 @@ const userSchema = new Schema<IUser>(
     googleId: { type: String, sparse: true, unique: true },
     avatar: { type: String },
     refreshToken: { type: String },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    xp: { type: Number, default: 0 },
+    level: { type: Number, default: 1 },
+    streak: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

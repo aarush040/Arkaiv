@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Sparkles, 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
-  CheckCircle2, 
+import {
+  Sparkles,
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle2,
   AlertCircle,
-  HelpCircle
 } from 'lucide-react';
 import { AuthUser } from '../types';
 import authService from '../services/authService';
@@ -27,18 +26,10 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handlePrefillTest = () => {
-    setIsRegister(false);
-    setEmail('priya.verma@nitap.edu.in');
-    setPassword('StartupPass2026!');
-    setError(null);
-    setSuccess('Quick credentials prefilled. Just click Proceed Log In below.');
-  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,9 +111,16 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    // Delegate the redirect to authService so the redirect target is
+    // centralized. The backend handles the actual OAuth flow and ultimately
+    // redirects back to /auth/callback with the JWT tokens in the query string.
+    authService.loginWithGoogle();
+  };
+
   return (
     <div id="arkaiv-login-root" className="min-h-screen bg-[#f8fafc] flex flex-col justify-between p-4 md:p-8 max-w-5xl mx-auto">
-      
+
       {/* NEP ALIGNMENT TOP BANNER */}
       <div className="w-full bg-[#eef2ff] border border-[#c7d2fe] p-3 rounded-2xl flex flex-col sm:flex-row items-center gap-2.5 text-center sm:text-left mb-4 shadow-xs">
         <div className="inline-flex h-7 px-2.5 rounded bg-indigo-600 text-white font-extrabold text-[10px] items-center justify-center tracking-wider shrink-0 select-none">
@@ -154,7 +152,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
       {/* Main Authentic Card Area */}
       <main className="flex-1 flex flex-col justify-center py-6">
         <div className="w-full max-w-md mx-auto bg-white border border-slate-200 shadow-xl rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden">
-          
+
           {/* Subtle decoration accent */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400" />
 
@@ -163,8 +161,8 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
               {isRegister ? 'Create Your Account' : 'Sign In To Proceed'}
             </h2>
             <p className="text-xs font-medium text-slate-500 leading-relaxed">
-              {isRegister 
-                ? 'Join your peers on custom CBSE, SWAYAM and NCERT educational mapping.' 
+              {isRegister
+                ? 'Join your peers on custom CBSE, SWAYAM and NCERT educational mapping.'
                 : 'Welcome back! Log in to resume your active competency timeline metrics.'}
             </p>
           </div>
@@ -178,8 +176,8 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                 setSuccess(null);
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                isRegister 
-                  ? 'bg-white text-indigo-600 shadow-sm font-extrabold' 
+                isRegister
+                  ? 'bg-white text-indigo-600 shadow-sm font-extrabold'
                   : 'text-slate-650 hover:text-slate-900'
               }`}
             >
@@ -192,8 +190,8 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                 setSuccess(null);
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                !isRegister 
-                  ? 'bg-white text-indigo-600 shadow-sm font-extrabold' 
+                !isRegister
+                  ? 'bg-white text-indigo-600 shadow-sm font-extrabold'
                   : 'text-slate-650 hover:text-slate-900'
               }`}
             >
@@ -202,7 +200,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
           </div>
 
           <form onSubmit={handleAuthSubmit} className="space-y-4 text-left">
-            
+
             {/* NAME FIELD (Register only) */}
             <AnimatePresence initial={false}>
               {isRegister && (
@@ -285,7 +283,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setError("To demonstrate password reset, please use 'Prefill Sandbox Credentials' below for instant entry.");
+                      setError('To reset your password, please contact support or sign in with Google.');
                     }}
                     className="text-[10px] font-bold text-indigo-600 hover:underline cursor-pointer"
                   >
@@ -357,18 +355,29 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
             </button>
           </form>
 
-          {/* Test Account prefill helper panel */}
+          {/* Google Sign-In panel (replaces the previous Sandbox Assessment Utility) */}
           <div className="pt-2 border-t border-slate-100 flex flex-col items-center">
             <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">
-              Sandbox Assessment Utility
+              Quick Access
             </span>
             <button
-              onClick={handlePrefillTest}
+              onClick={handleGoogleSignIn}
               type="button"
-              className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-indigo-400 text-[10px] font-bold text-slate-650 rounded-lg transition-all cursor-pointer shadow-3xs"
+              className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-400 text-[10px] font-bold text-slate-650 rounded-lg transition-all cursor-pointer shadow-3xs"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Prefill Test Credentials (Priya Path)</span>
+              {/* Google "G" multi-color logo (inline SVG) */}
+              <svg
+                className="w-3.5 h-3.5 shrink-0"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+                <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+                <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-6.627 0-12-5.373-12-12h-8c0 11.045 8.955 20 20 20z" />
+                <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571.001-.001.002-.001.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+              </svg>
+              <span>Continue with Google</span>
             </button>
           </div>
 

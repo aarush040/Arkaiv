@@ -1,22 +1,6 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('arkaiv_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import apiClient from './apiClient';
 
 export interface ProgressData {
-  userId?: string;
   goal?: string;
   level?: string;
   commitment?: number;
@@ -25,33 +9,43 @@ export interface ProgressData {
   marksheetName?: string;
 }
 
+/**
+ * Progress service — manages the user's progress document (goal, level,
+ * commitment, duration, marksheet metadata). Backed by MongoDB via the
+ * ARKAIV REST API.
+ */
 export const progressService = {
-  async saveProgress(data: ProgressData) {
-    const response = await api.post('/progress', data);
+  /** GET /api/progress */
+  async get() {
+    const response = await apiClient.get('/progress');
     return response.data;
   },
 
-  async getProgress() {
-    const response = await api.get('/progress');
+  /** PUT /api/progress */
+  async save(data: ProgressData) {
+    const response = await apiClient.put('/progress', data);
     return response.data;
   },
 
-  async updateProgress(id: string, data: Partial<ProgressData>) {
-    const response = await api.put(`/progress/${id}`, data);
+  /** POST /api/progress (alias used by some clients) */
+  async create(data: ProgressData) {
+    const response = await apiClient.post('/progress', data);
     return response.data;
   },
 
+  /** POST /api/progress/upload-marksheet (multipart/form-data) */
   async uploadMarksheet(file: File) {
     const formData = new FormData();
     formData.append('marksheet', file);
-    const response = await api.post('/progress/upload-marksheet', formData, {
+    const response = await apiClient.post('/progress/upload-marksheet', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
 
+  /** POST /api/progress/sync-platform */
   async syncGovernmentPlatform(platform: string) {
-    const response = await api.post('/progress/sync-platform', { platform });
+    const response = await apiClient.post('/progress/sync-platform', { platform });
     return response.data;
   },
 };
